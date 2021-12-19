@@ -29,7 +29,6 @@ class ProductFactory extends Factory
             'price' => $this->faker->numberBetween(10,999),
             'currency_id'=>Currency::all()->random()->id,
             'seller_id'=>Seller::all()->random()->id,
-
         ];
     }
 }

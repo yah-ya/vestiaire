@@ -5,7 +5,6 @@ namespace App\Http\Controllers;
 use App\Models\Currency;
 use App\Models\Transaction;
 use App\Models\TransactionProduct;
-use Illuminate\Database\Eloquent\Model;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Collection;
