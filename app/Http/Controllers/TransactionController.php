@@ -14,9 +14,11 @@ use Illuminate\Support\Facades\Validator;
 class TransactionController extends Controller
 {
 
+    // Max amount we can payout in one transaction
     private $maxValueOfTransactions = 1000;
 
     /**
+     * It will create spliced transactions and save in the database
      * @param Request $req
      * @return JsonResponse
      */
@@ -40,14 +42,18 @@ class TransactionController extends Controller
 
     }
 
-    //
-    // We need to check products currencies first , to group up products with same currency_id,
-    // so we will create spliced payouts for each group of currencies
-    // ( we can not convert product prices into only one currency because of the change rate is always changing )
-    //
-    // After that we also need to check if each group do not exceed the max amount of payment,
-    // if so , we need to split them again
-    //
+
+    /**
+     * We need to check products currencies first , to group up products with same currency_id,
+     * so we will create spliced payouts for each group of currencies
+     * ( we can not convert product prices into only one currency because of the change rate is always changing )
+     *
+     * After that we also need to check if each group do not exceed the max amount of payment,
+     * if so , we need to split them again
+     *
+     * @param Collection $products
+     * @return array
+     */
     public function splitProducts(Collection $products): array
     {
         $spliced = [];
@@ -67,10 +73,14 @@ class TransactionController extends Controller
 
     }
 
-    //
-    // Checks if the products sum price is bigger than the limit
-    // splits the array
-    //
+
+    /**
+     * Checks if the products sum price is bigger than the limit
+     * splits the array
+     *
+     * @param Collection $products
+     * @return object
+     */
     private function splitProductsByMaxSumPrice(Collection $products): object
     {
         $spliced = [];
@@ -79,6 +89,8 @@ class TransactionController extends Controller
         foreach($products as $product){
             // Need to have SUM value of these products
             $sum += $product->price;
+
+            //Exceeded the limit , so lets create a new array block and reset the SUM value
             if($sum > $this->maxValueOfTransactions){
                 $sum = 0;
                 $splicedCount++;
@@ -100,7 +112,14 @@ class TransactionController extends Controller
         }
     }
 
-    private function saveTransactions($transactions,$sellerId):bool
+
+    /**
+     * ToDo: Rollback the database if something bad happened
+     * @param $transactions
+     * @param $sellerId
+     * @return bool
+     */
+    private function saveTransactions($transactions, $sellerId):bool
     {
         foreach($transactions as $currencyId=>$transaction){
             //this currency has no transactions
